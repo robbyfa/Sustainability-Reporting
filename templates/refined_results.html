@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  {% include 'navbar.html' %}
+  <body class="bg-gray-100">
+    <div class="container mx-auto p-8">
+      <h2 class="text-4xl font-bold mb-6 text-gray-900">
+        Refined Activity Results
+      </h2>
+      <div class="overflow-x-auto mt-6">
+        <button
+          onclick="history.back()"
+          class="bg-white mx-2 text-black hover:bg-black hover:text-white py-2 px-4 rounded transition duration-300 mb-2"
+        >
+          Back
+        </button>
+        <table class="min-w-full border-collapse table-auto">
+          <thead class="bg-gray-200">
+            <tr>
+              <th
+                class="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider"
+              >
+                Activity
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white">
+            {% for index, row in refined_activities.iterrows() %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-4 border-b border-gray-200">
+                {{ row.Activity }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

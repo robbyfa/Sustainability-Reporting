@@ -1,0 +1,85 @@
+Code,Definition,Description
+F41.1,Development of building projects class,"This class includes:
+
+development of building projects for residential and non-residential buildings by bringing together financial, technical and physical means to realise the building projects for later sale
+This class excludes:
+
+construction of buildings, see 41.20
+architectural and engineering activities, see 71.1
+project management services related to building projects, see 71.1"
+F41.2,Construction of residential and non-residential buildings class,"This class includes:
+
+construction of all types of residential buildings:
+single-family houses
+multi-family buildings, including high-rise buildings
+construction of all types of non-residential buildings:
+buildings for industrial production, e.g. factories, workshops, assembly plants etc.
+hospitals, schools, office buildings
+hotels, stores, shopping malls, restaurants
+airport buildings
+indoor sports facilities
+parking garages, including underground parking garages
+warehouses
+religious buildings
+assembly and erection of prefabricated constructions on the site
+This class also includes:
+
+remodelling or renovating existing residential structures
+This class excludes:
+construction of industrial facilities, except buildings, see 42.99
+architectural and engineering activities, see 71.1
+project management for construction, see 71.1"
+F42,,"This division includes general construction for civil engineering objects. It includes new work, repair, additions and alterations, the erection of pre-fabricated structures on the site and also construction of temporary nature. Included is the construction of heavy constructions such as motorways, streets, bridges, tunnels, railways, airfields, harbours and other water projects, irrigation systems, sewerage systems, industrial facilities, pipelines and electric lines, outdoor sports facilities, etc. This work can be carried out on own account or on a fee or contract basis. Portions of the work and sometimes even the whole practical work can be subcontracted out."
+F43,,"This division includes specialised construction activities (special trades), i.e. the construction of parts of buildings and civil engineering works or preparation therefore. These activities are usually specialised in one aspect common to different structures, requiring specialised skills or equipment, such as pile-driving, foundation work, carcass work, concrete work, brick laying, stone setting, scaffolding, roof covering, etc. The erection of steel structures is included, provided that the parts are not produced by the same unit. Specialised construction activities are mostly carried out under subcontract, but especially in repair construction it is done directly for the owner of the property.
+
+Also included are building finishing and building completion activities.
+
+Included is the installation of all kind of utilities that make the construction function as such. These activities are usually performed at the site of the construction, although parts of the job may be carried out in a special shop. Included are activities such as plumbing, installation of heating and air-conditioning systems, antennas, alarm systems and other electrical work, sprinkler systems, elevators and escalators, etc. Also included are insulation work (water, heat, sound), sheet metal work, commercial refrigerating work, the installation of illumination and signalling systems for roads, railways, airports, harbours, etc. Also repair of the same type as the above mentioned activities is included. Building completion activities encompass activities that contribute to the completion or finishing of a construction such as glazing, plastering, painting, floor and wall tiling or covering with other materials like parquet, carpets, wallpaper, etc., floor sanding, finish carpentry, acoustical work, cleaning of the exterior, etc.
+
+Also repair of the same type as the above mentioned activities is included. The renting of equipment with operator is classified with the associated construction activity.
+"
+M71,,"This division includes the provision of architectural services, engineering services, drafting services, building inspection services and surveying and mapping services
+
+It also includes the performance of physical, chemical, and other analytical testing services.
+"
+C16,,"This division includes the manufacture of wood products, such as lumber, plywood, veneers, wood containers, wood flooring, wood trusses, and prefabricated wood buildings. The production processes include sawing, planing, shaping, laminating, and assembling of wood products starting from logs that are cut into bolts, or lumber that may then be cut further, or shaped by lathes or other shaping tools. The lumber or other transformed wood shapes may also be subsequently planed or smoothed, and assembled into finished products, such as wood containers. With the exception of sawmilling, this division is subdivided mainly based on the specific products manufactured.
+
+This division does not include the manufacture of furniture (31.0), or the installation of wooden fittings and the like (43.32, 43.33, 43.39).
+"
+C17,,"This division includes the manufacture of pulp, paper and converted paper products. The manufacture of these products is grouped together because they constitute a series of vertically connected processes. More than one activity is often carried out in a single unit.
+
+There are essentially three activities: The manufacture of pulp involves separating the cellulose fibres from other matter in wood, or dissolving and de-inking of used paper, and mixing in small amounts of reagents to reinforce the binding of the fibres. The manufacture of paper involves releasing pulp onto a moving wire mesh so as to form a continuous sheet. Converted paper products are made from paper and other materials by various techniques. The paper articles may be printed (e.g. wallpaper, gift wrap etc.), as long as the printing of information is not the main purpose.
+
+The production of pulp, paper and paperboard in bulk is included in group 17.1, while the remaining classes include the production of further-processed paper and paper products."
+C22,,"This division includes the manufacture of rubber and plastics products.
+
+This division is characterised by the raw materials used in the manufacturing process. However, this does not imply that the manufacture of all products made of these materials is classified here."
+C23,,"This division includes manufacturing activities related to a single substance of mineral origin.
+
+This division includes the manufacture of glass and glass products (e.g. flat glass, hollow glass, fibres, technical glassware etc.), ceramic products, tiles and baked clay products, and cement and plaster, from raw materials to finished articles. The manufacture of shaped and finished stone and other mineral products is also included in this division."
+C25,,"This division includes the manufacture of “pure” metal products (such as parts, containers and structures), usually with a static, immovable function, as opposed to the following divisions 26-30, which cover the manufacture of combinations or assemblies of such metal products (sometimes with other materials) into more complex units that, unless they are purely electrical, electronic or optical, work with moving parts.
+
+The manufacture of weapons and ammunition is also included in this division.
+
+This division excludes:
+
+specialised repair and maintenance activities, see 33.1
+specialised installation of manufactured goods produced in this division in buildings, such as central heating boilers, see 43.22"
+C27,,"This division includes the manufacture of products that generate, distribute and use electrical power. Also included is the manufacture of electrical lighting, signalling equipment and electric household appliances.
+
+This division excludes the manufacture of electronic products (see division 26).
+"
+C28,,"This division includes the manufacture of machinery and equipment that act independently on materials either mechanically or thermally or perform operations on materials (such as handling, spraying, weighing or packing), including their mechanical components that produce and apply force, and any specially manufactured primary parts. This includes the manufacture of fixed and mobile or hand-held devices, regardless of whether they are designed for industrial, building and civil engineering, agricultural or home use. The manufacture of special equipment for passenger or freight transport within demarcated premises also belongs within this division.
+
+This division distinguishes between the manufacture of special-purpose machinery, i.e. machinery for exclusive use in a NACE industry or a small cluster of NACE industries, and general-purpose machinery, i.e. machinery that is being used in a wide range of NACE industries.
+
+This division also includes the manufacture of other special-purpose machinery, not covered elsewhere in the classification, whether or not used in a manufacturing process, such as fairground amusement equipment, automatic bowling alley equipment, etc.
+
+This division excludes the manufacture of metal products for general use (division 25), associated control devices, computer equipment, measurement and testing equipment, electricity distribution and control apparatus (divisions 26 and 27) and general-purpose motor vehicles (divisions 29 and 30).
+
+"
+L68,,"This section includes acting as lessors, agents and/or brokers in one or more of the following: selling or buying real estate, renting real estate, providing other real estate services such as appraising real estate or acting as real estate escrow agents. Activities in this section may be carried out on own or leased property and may be done on a fee or contract basis.
+
+Also included is the building of structures, combined with maintaining ownership or leasing of such structures.
+
+This section includes real estate property managers."

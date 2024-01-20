@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.4/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body
+    class="bg-gray-100 text-black min-h-screen flex items-center justify-center"
+  >
+    <div class="text-center">
+      <h1 class="text-3xl font-semibold mb-4">Create an account</h1>
+      <form
+        action="#"
+        method="post"
+        class="bg-white rounded-md p-4 shadow-md space-y-2"
+      >
+        <div class="flex flex-col">
+          <label for="username" class="text-gray-400">Username:</label>
+          <input
+            type="text"
+            name="username"
+            class="bg-gray-100 rounded-md p-2"
+          />
+        </div>
+        <div class="flex flex-col">
+          <label for="password" class="text-gray-400">Password:</label>
+          <input
+            type="password"
+            name="password"
+            class="bg-gray-100 rounded-md p-2"
+          />
+        </div>
+        <button
+          type="submit"
+          class="bg-white hover:bg-black text-black hover:text-white rounded-full py-2 px-4 transition duration-300 transform hover:scale-105"
+        >
+          Submit
+        </button>
+      </form>
+    </div>
+  </body>
+</html>

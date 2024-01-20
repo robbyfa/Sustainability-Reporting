@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  {% include 'navbar.html' %}
+
+  <body class="bg-gray-100">
+    <div class="container mx-auto p-8">
+      <h1 class="text-4xl font-bold text-center text-gray-900 mb-10">
+        Construction Activities
+      </h1>
+      <button
+        onclick="history.back()"
+        class="bg-white mx-2 text-black hover:bg-black hover:text-white py-2 px-4 rounded transition duration-300 mb-2"
+      >
+        Back
+      </button>
+      <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+        <table class="min-w-full leading-normal">
+          <thead class="bg-gray-200">
+            <tr>
+              <th
+                class="px-5 py-3 border-b border-gray-300 text-left text-sm font-semibold text-gray-800 uppercase tracking-wider"
+              >
+                Activity ID
+              </th>
+              <th
+                class="px-5 py-3 border-b border-gray-300 text-left text-sm font-semibold text-gray-800 uppercase tracking-wider"
+              >
+                Activity Name
+              </th>
+              <th
+                class="px-5 py-3 border-b border-gray-300 text-left text-sm font-semibold text-gray-800 uppercase tracking-wider"
+              >
+                Add
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for activity in activities %}
+            <tr class="hover:bg-gray-50 transition duration-300 ease-in-out">
+              <td class="px-5 py-5 border-b border-gray-300 bg-white text-sm">
+                <div class="text-gray-900 whitespace-no-wrap">
+                  {{ activity.id }}
+                </div>
+              </td>
+              <td class="px-5 py-5 border-b border-gray-300 bg-white text-sm">
+                <a
+                  href="/activity/{{ activity.id }}"
+                  class="text-gray-900 hover:text-gray-700"
+                >
+                  {{ activity.activityName }}
+                </a>
+              </td>
+              <td class="px-4 py-4 border-b border-gray-300 bg-white text-lg">
+                <button
+                  onclick="addActivity('{{ activity.id }}')"
+                  class="bg-green-400 hover:bg-black text-black hover:text-green-400 font-bold rounded-full h-10 w-10 flex items-center justify-center"
+                >
+                  +
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    function addActivity(activityId) {
+      // The activityId is already the extracted ID, so we use it directly.
+      fetch(`/add_activity/${activityId}`, {
+        method: "POST",
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            alert("Activity added successfully!");
+          } else if (response.status === 400) {
+            return response.json().then((data) => {
+              alert(data.message);
+            });
+          } else {
+            alert("An error occurred while adding the activity.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("An error occurred while adding the activity.");
+        });
+    }
+  </script>
+</html>

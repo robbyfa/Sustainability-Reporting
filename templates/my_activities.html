@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  {% include 'navbar.html' %}
+
+  <body class="bg-white">
+    <div class="container mx-auto p-8">
+      <h1 class="text-4xl font-bold text-center text-black mb-10">
+        Subscribed Activities
+      </h1>
+
+      <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+        <table class="min-w-full leading-normal">
+          <tbody id="activity-table-body">
+            {% for activity in user_activities %}
+            <tr class="bg-white">
+              <td
+                colspan="4"
+                class="px-5 py-3 border-b border-gray-300 text-left text-sm font-semibold text-black"
+              >
+                <div
+                  x-data="{ open: false }"
+                  class="flex justify-between items-center"
+                >
+                  <button
+                    @click="open = !open"
+                    class="font-bold focus:outline-none text-black text-l"
+                  >
+                    {{ activity.activityName }}
+                  </button>
+                  <button
+                    onclick="removeActivity('{{ activity.id }}')"
+                    class="text-red-600 hover:text-red-800"
+                  >
+                    X
+                  </button>
+                </div>
+                <div x-show="open" class="mt-2" x-cloak>
+                  {% for category, criteria_list in activity.criteria.items() %}
+                  <div class="font-semibold text-black">{{ category }}:</div>
+                  <table class="min-w-full mt-2 bg-gray-100 mb-2">
+                    <tbody>
+                      {% for criterion in criteria_list %}
+                      <tr>
+                        <td class="border px-4 py-2 text-black">
+                          <div class="flex items-center">
+                            <input
+                              type="checkbox"
+                              data-activity-id="{{ activity.id }}"
+                              data-dnsh="{{ criterion.dnsh }}"
+                              onchange="updateCompliance(this.getAttribute('data-activity-id'), this.getAttribute('data-dnsh'), this.checked)"
+                            />
+                            {{ criterion.description }}
+                          </div>
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                  {% endfor %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <button
+          onclick="publishList()"
+          class="bg-black mx-2 text-white hover:bg-white hover:text-black py-2 px-4 rounded transition duration-300 mb-2"
+        >
+          Publish
+        </button>
+      </div>
+    </div>
+    <script>
+      function removeActivity(activityId) {
+        // Make an AJAX POST request to the /add_activity/<activityId> endpoint
+        fetch(`/remove_activity/${activityId}`, {
+          method: "POST",
+        })
+          .then((response) => {
+            if (response.status === 200) {
+              alert("Activity removed successfully!");
+
+              // Remove the row from the table
+              const rowToRemove = document
+                .querySelector(`[onclick="removeActivity('${activityId}')"]`)
+                .closest("tr");
+              document
+                .getElementById("activity-table-body")
+                .removeChild(rowToRemove);
+            } else if (response.status === 400) {
+              return response.json().then((data) => {
+                alert(data.message);
+              });
+            } else {
+              alert("An error occurred while removing the activity.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("An error occurred while removing the activity.");
+          });
+      }
+
+      function updateCompliance(activityId, dnsh, isCompliant) {
+        fetch(`/update_compliance/${activityId}/${dnsh}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ is_compliant: isCompliant }),
+        })
+          .then((response) => {
+            if (response.ok) {
+              alert("Compliance status updated.");
+            } else {
+              alert("Failed to update compliance status.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("An error occurred.");
+          });
+      }
+
+      function publishList() {
+        fetch("/publish_list", {
+          method: "POST",
+        })
+          .then((response) => {
+            if (response.ok) {
+              alert("List published successfully.");
+            } else {
+              alert("Failed to publish list.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("An error occurred.");
+          });
+      }
+
+      function uploadFile(activityId) {
+        var formData = new FormData();
+        var fileField = document.querySelector(`#file_${activityId}`);
+
+        formData.append("file", fileField.files[0]);
+        formData.append("activityId", activityId);
+
+        fetch("/upload_file", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((result) => {
+            console.log("Success:", result);
+            alert("File uploaded successfully.");
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("An error occurred during file upload.");
+          });
+      }
+    </script>
+
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+
+    <script>
+      // Optional: If you wish to use Alpine.js for the accordion
+      document.addEventListener("alpine:init", () => {
+        Alpine.data("accordion", () => ({
+          open: false,
+        }));
+      });
+    </script>
+  </body>
+</html>

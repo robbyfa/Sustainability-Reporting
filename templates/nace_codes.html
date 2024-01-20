@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <script src="//unpkg.com/alpinejs" defer></script>
+
+  {% include 'navbar.html' %}
+
+  <body class="bg-gray-100">
+    <div class="container mx-auto p-8">
+      <h1 class="text-4xl font-semibold text-center text-gray-800 mb-10">
+        Construction NACE Codes
+      </h1>
+      <button
+        onclick="history.back()"
+        class="bg-white mx-2 text-black hover:bg-black hover:text-white py-2 px-4 rounded transition duration-300 mb-2"
+      >
+        Back
+      </button>
+
+      {% for category, codes in nace_categories.items() %}
+      <div x-data="{ open: false }" class="mb-8">
+        <button
+          @click="open = !open"
+          class="flex justify-between items-center bg-gray-200 px-6 py-3 w-full rounded text-left text-gray-800 font-semibold focus:outline-none"
+        >
+          <span>{{ category_titles[category] }} ({{ category }})</span>
+          <svg
+            :class="{ 'transform rotate-180': open }"
+            class="w-6 h-6"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+
+        <div
+          x-show="open"
+          class="mt-2 bg-white shadow overflow-hidden rounded-md"
+          x-cloak
+        >
+          <table class="min-w-full">
+            <thead>
+              <tr>
+                <th
+                  class="px-6 py-3 border-b text-left text-xs font-semibold text-gray-800 uppercase tracking-wider"
+                >
+                  Code
+                </th>
+                <th
+                  class="px-6 py-3 border-b text-left text-xs font-semibold text-gray-800 uppercase tracking-wider"
+                >
+                  Description
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for code in codes %}
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 border-b text-sm text-gray-900 text-left">
+                  {{ code['code'] }}
+                </td>
+                <td class="px-6 py-4 border-b text-sm text-gray-600 text-left">
+                  <a
+                    href="/nace/{{ code['code'] }}"
+                    class="hover:text-blue-800"
+                  >
+                    {{ code['description'] }}
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </body>
+</html>

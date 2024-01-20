@@ -1,0 +1,56 @@
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome - Sustainability Reporting Tool</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.4/dist/tailwind.min.css"
+    rel="stylesheet"
+  />
+</head>
+<nav class="bg-white p-4 shadow-md">
+  <div class="container mx-auto flex justify-between items-center">
+    <a href="/" class="text-xl font-semibold text-black">EU</a>
+    <div class="space-x-4">
+      <a
+        href="/activities/construction"
+        class="text-black hover:bg-black hover:text-white py-2 px-4 rounded transition duration-300"
+        >Activities</a
+      >
+      <a
+        href="/nace/codes"
+        class="text-black hover:bg-black hover:text-white py-2 px-4 rounded transition duration-300"
+        >Codes</a
+      >
+      <a
+        href="/my_activities"
+        class="text-black hover:bg-black hover:text-white py-2 px-4 rounded transition duration-300"
+        >My List</a
+      >
+      <a
+        href="/forum"
+        class="text-black hover:bg-black hover:text-white py-2 px-4 rounded transition duration-300"
+        >Forum</a
+      >
+    </div>
+    <div class="space-x-4">
+      {% if current_user.is_authenticated %}
+      <a
+        href="/logout"
+        class="text-black hover:bg-black hover:text-white py-2 px-4 rounded transition duration-300"
+        >Logout</a
+      >
+      {% else %}
+      <a
+        href="/login"
+        class="text-black hover:bg-black hover:text-white py-2 px-4 rounded transition duration-300"
+        >Login</a
+      >
+      <a
+        href="/login"
+        class="text-black hover:bg-black hover:text-white py-2 px-4 rounded transition duration-300"
+        >Register</a
+      >
+      {% endif %}
+    </div>
+  </div>
+</nav>

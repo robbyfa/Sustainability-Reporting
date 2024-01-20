@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login and Register</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.4/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body
+    class="bg-gray-100 text-black min-h-screen flex items-center justify-center"
+  >
+    <div class="w-full max-w-3xl mx-auto p-8 bg-white shadow-md flex space-x-8">
+      <!-- Login Form -->
+      <div class="w-1/2">
+        <h1 class="text-3xl font-semibold mb-4">Login</h1>
+        <form action="/login" method="post" class="space-y-4">
+          <input type="hidden" name="form_type" value="login" />
+          <div class="flex flex-col">
+            <label for="username" class="text-black">Username:</label>
+            <input
+              type="text"
+              name="username"
+              class="bg-gray-100 rounded-md p-2 text-black"
+            />
+          </div>
+          <div class="flex flex-col">
+            <label for="password" class="text-black">Password:</label>
+            <input
+              type="password"
+              name="password"
+              class="bg-gray-100 rounded-md p-2 text-black"
+            />
+          </div>
+          <button
+            type="submit"
+            class="text-white bg-black hover:bg-white hover:text-black py-2 px-4 rounded transition duration-300"
+          >
+            Login
+          </button>
+        </form>
+      </div>
+      <!-- Register Form -->
+      <div class="w-1/2 border-l pl-4">
+        <h1 class="text-3xl font-semibold mb-4">Create an Account</h1>
+        <form action="/register" method="post" class="space-y-4">
+          <input type="hidden" name="form_type" value="register" />
+          <div class="flex flex-col">
+            <label for="register_username" class="text-black">Username:</label>
+            <input
+              type="text"
+              name="register_username"
+              class="bg-gray-100 rounded-md p-2"
+            />
+          </div>
+          <div class="flex flex-col">
+            <label for="register_password" class="text-black">Password:</label>
+            <input
+              type="password"
+              name="register_password"
+              class="bg-gray-100 rounded-md p-2 text-black"
+            />
+          </div>
+          <button
+            type="submit"
+            class="text-white bg-black hover:bg-white hover:text-black py-2 px-4 rounded transition duration-300"
+          >
+            Register
+          </button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

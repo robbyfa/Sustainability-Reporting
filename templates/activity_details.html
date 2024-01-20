@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+  {% include 'navbar.html' %}
+
+  <body class="bg-gray-100">
+    <div class="container mx-auto mt-10 p-5">
+      <button
+        onclick="history.back()"
+        class="bg-black text-white hover:bg-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300"
+      >
+        Back
+      </button>
+
+      <div class="bg-white shadow-lg rounded-lg p-6 mt-5">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">
+          {{ activity['id'] }}: {{ activity['activityName'] | replace('_', ' ')
+          | title }}
+        </h1>
+        <p class="mt-2 font-semibold">
+          Contribution type: {{ activity['contributionType'] | default('N/A',
+          true) }}
+        </p>
+        <p class="mb-6 text-gray-800">{{ activity['description'] }}</p>
+
+        <!-- NACE Codes Table -->
+        <div class="mb-8">
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">
+            Related NACE Codes
+          </h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full border-collapse table-auto">
+              <thead>
+                <tr>
+                  <th
+                    class="px-4 py-2 border-b-2 border-gray-900 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider"
+                  >
+                    NACE Code
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for nace_code in activity['nace_codes'] %}
+                <tr class="hover:bg-gray-100 transition duration-300">
+                  <td class="px-4 py-2 border-b border-gray-300 text-gray-800">
+                    {{ nace_code }}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- DNSH Criteria Accordion -->
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">
+            DNSH Criteria
+          </h2>
+          {% set criteria_categories = {'Mitigation': [], 'Biodiversity': [],
+          'Water': [], 'Pollution': []} %} {% for criterion in
+          activity['dnsh_criteria'] %} {% if 'Mitigation' in criterion['dnsh']
+          %} {% set _ = criteria_categories['Mitigation'].append(criterion) %}
+          {% elif 'Biodiversity' in criterion['dnsh'] %} {% set _ =
+          criteria_categories['Biodiversity'].append(criterion) %} {% elif
+          'Water' in criterion['dnsh'] %} {% set _ =
+          criteria_categories['Water'].append(criterion) %} {% elif 'Pollution'
+          in criterion['dnsh'] %} {% set _ =
+          criteria_categories['Pollution'].append(criterion) %} {% endif %} {%
+          endfor %}
+
+          <!-- Mitigation Criteria Accordion -->
+          <div x-data="{ open: false }" class="mb-2">
+            <button
+              @click="open = !open"
+              class="flex justify-between items-center w-full font-bold text-gray-900 py-2 px-4 rounded focus:outline-none focus:shadow-outline bg-gray-200 hover:bg-gray-300 transition duration-300"
+            >
+              <span>Mitigation</span>
+              <svg
+                :class="{'rotate-180': open}"
+                class="fill-current text-gray-900 h-4 w-4 transform transition-transform duration-300"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path d="M5.59 7L10 11.41 14.41 7 16 8.41l-6 6-6-6L5.59 7z" />
+              </svg>
+            </button>
+            <div
+              x-show="open"
+              class="border-l-2 border-b-2 border-r-2 border-gray-900 rounded-b-lg mt-1"
+            >
+              <ul class="list-disc pl-8 pr-4 py-2 bg-white">
+                {% for criterion in criteria_categories['Mitigation'] %}
+                <li
+                  class="text-gray-800 py-1 hover:text-gray-600 transition duration-300"
+                >
+                  {{ criterion['description'] }}
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+
+          <!-- Biodiversity Criteria Accordion -->
+          <div x-data="{ open: false }" class="mb-2">
+            <button
+              @click="open = !open"
+              class="flex justify-between items-center w-full font-bold text-gray-900 py-2 px-4 rounded focus:outline-none focus:shadow-outline bg-gray-200 hover:bg-gray-300 transition duration-300"
+            >
+              <span>Biodiversity Criteria</span>
+              <svg
+                :class="{'rotate-180': open}"
+                class="fill-current text-gray-900 h-4 w-4 transform transition-transform duration-300"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path d="M5.59 7L10 11.41 14.41 7 16 8.41l-6 6-6-6L5.59 7z" />
+              </svg>
+            </button>
+            <div
+              x-show="open"
+              class="border-l-2 border-b-2 border-r-2 border-gray-900 rounded-b-lg mt-1"
+            >
+              <ul class="list-disc pl-8 pr-4 py-2 bg-white">
+                {% for criterion in criteria_categories['Biodiversity'] %}
+                <li
+                  class="text-gray-800 py-1 hover:text-gray-600 transition duration-300"
+                >
+                  {{ criterion['description'] }}
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+
+          <!-- Water Criteria Accordion -->
+          <div x-data="{ open: false }" class="mb-2">
+            <button
+              @click="open = !open"
+              class="flex justify-between items-center w-full font-bold text-gray-900 py-2 px-4 rounded focus:outline-none focus:shadow-outline bg-gray-200 hover:bg-gray-300 transition duration-300"
+            >
+              <span>Water Criteria</span>
+              <svg
+                :class="{'rotate-180': open}"
+                class="fill-current text-gray-900 h-4 w-4 transform transition-transform duration-300"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path d="M5.59 7L10 11.41 14.41 7 16 8.41l-6 6-6-6L5.59 7z" />
+              </svg>
+            </button>
+            <div
+              x-show="open"
+              class="border-l-2 border-b-2 border-r-2 border-gray-900 rounded-b-lg mt-1"
+            >
+              <ul class="list-disc pl-8 pr-4 py-2 bg-white">
+                {% for criterion in criteria_categories['Water'] %}
+                <li
+                  class="text-gray-800 py-1 hover:text-gray-600 transition duration-300"
+                >
+                  {{ criterion['description'] }}
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+
+          <!-- Pollution Prevention Criteria Accordion -->
+          <div x-data="{ open: false }" class="mb-2">
+            <button
+              @click="open = !open"
+              class="flex justify-between items-center w-full font-bold text-gray-900 py-2 px-4 rounded focus:outline-none focus:shadow-outline bg-gray-200 hover:bg-gray-300 transition duration-300"
+            >
+              <span>Pollution Prevention Criteria</span>
+              <svg
+                :class="{'rotate-180': open}"
+                class="fill-current text-gray-900 h-4 w-4 transform transition-transform duration-300"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path d="M5.59 7L10 11.41 14.41 7 16 8.41l-6 6-6-6L5.59 7z" />
+              </svg>
+            </button>
+            <div
+              x-show="open"
+              class="border-l-2 border-b-2 border-r-2 border-gray-900 rounded-b-lg mt-1"
+            >
+              <ul class="list-disc pl-8 pr-4 py-2 bg-white">
+                {% for criterion in criteria_categories['Pollution'] %}
+                <li
+                  class="text-gray-800 py-1 hover:text-gray-600 transition duration-300"
+                >
+                  {{ criterion['description'] }}
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+
+    <script>
+      // Optional: If you wish to use Alpine.js for the accordion
+      document.addEventListener("alpine:init", () => {
+        Alpine.data("accordion", () => ({
+          open: false,
+        }));
+      });
+    </script>
+  </body>
+</html>
