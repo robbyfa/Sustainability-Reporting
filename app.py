@@ -14,7 +14,7 @@ import os
 app = Flask(__name__)
 
 # Initialize SPARQL endpoint connection
-sparql_endpoint_url = "http://Roberts-MacBook-Pro.local:7200/repositories/Amir"
+sparql_endpoint_url = "http://Roberts-MacBook-Pro.local:7200/repositories/Ontology"
 sparql = SPARQLWrapper(sparql_endpoint_url)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///dsp.sqlite"
