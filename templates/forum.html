@@ -1,35 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
   {% include 'navbar.html' %}
-  <body>
+  <body class="bg-gray-100">
     <div class="container mx-auto p-8">
       <h1 class="text-4xl font-bold text-center text-gray-900 mb-10">
         Published Lists
       </h1>
 
-      <!-- ... existing HTML ... -->
       {% for user in published_users %}
-      <div class="user-section">
-        <h2>{{ user.username }}'s Activities</h2>
-        {% for activity in user.activities %}
-        <div class="activity-section">
-          <h3>{{ activity.activityName }}</h3>
-          <ul>
-            {% for criterion in activity.criteria %}
-            <li>
-              {{ criterion.criteria_description }} -
-              <strong
-                >{{ 'Compliant' if criterion.is_compliant else 'Non-Compliant'
-                }}</strong
-              >
-            </li>
-            {% endfor %}
-          </ul>
+      <div class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-bold text-gray-800">
+            {{ user.username }}'s Activities
+          </h2>
+          <button
+            onclick="location.href='/download_user_activities/{{ user.id }}'"
+            class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300"
+          >
+            Download TTL File
+          </button>
         </div>
-        {% endfor %}
+        <div class="bg-white shadow-md rounded-lg">
+          {% for activity in user.activities %}
+          <div class="p-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-700">
+              {{ activity.activityName }}
+            </h3>
+            <ul class="list-disc pl-5 mt-2">
+              {% for criterion in activity.criteria %}
+              <li class="text-gray-600">
+                {{ criterion.criteria_description }} -
+                <span
+                  class="{{ 'text-green-500' if criterion.is_compliant else 'text-red-500' }}"
+                  >{{ 'Compliant' if criterion.is_compliant else 'Non-Compliant'
+                  }}</span
+                >
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% else %}
+          <div class="text-center py-5 text-gray-700">No activities found</div>
+          {% endfor %}
+        </div>
       </div>
       {% endfor %}
-      <!-- ... remaining HTML ... -->
     </div>
   </body>
 </html>
