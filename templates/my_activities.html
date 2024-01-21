@@ -43,13 +43,12 @@
                       <tr>
                         <td class="border px-4 py-2 text-black">
                           <div class="flex items-center">
-                            <input
-                              type="checkbox"
-                              data-activity-id="{{ activity.id }}"
-                              data-dnsh="{{ criterion.dnsh }}"
-                              onchange="updateCompliance(this.getAttribute('data-activity-id'), this.getAttribute('data-dnsh'), this.checked)"
-                            />
-                            {{ criterion.description }}
+                            <input type="checkbox" data-activity-id="{{
+                            activity.id }}" data-dnsh="{{ criterion.dnsh }}"
+                            onchange="updateCompliance(this.getAttribute('data-activity-id'),
+                            this.getAttribute('data-dnsh'), this.checked)" {{
+                            'checked' if criterion.is_compliant else '' }} /> {{
+                            criterion.description }}
                           </div>
                         </td>
                       </tr>
@@ -103,6 +102,11 @@
       }
 
       function updateCompliance(activityId, dnsh, isCompliant) {
+        if (!activityId || !dnsh) {
+          console.error("Invalid activity ID or DNSH.");
+          return;
+        }
+
         fetch(`/update_compliance/${activityId}/${dnsh}`, {
           method: "POST",
           headers: {

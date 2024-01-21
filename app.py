@@ -50,7 +50,7 @@ class ActivityCriteria(db.Model):
     __tablename__ = 'activity_criteria'
     id = db.Column(db.Integer, primary_key=True)
     user_activity_id = db.Column(db.Integer, db.ForeignKey('user_activities.id'), nullable=False)
-    dnsh = db.Column(db.String(250))  # Add this line
+    dnsh = db.Column(db.String(250), nullable=False)  # Add this line
     criteria_description = db.Column(db.Text)
     is_compliant = db.Column(db.Boolean, default=False)
 # Initialize app with extension
@@ -174,28 +174,34 @@ def my_activities():
     activities_with_details = []
 
     for user_activity in user_activities:
-        activity_details_raw = get_activity_details(user_activity.activity_id)
-        criteria = {}
+        activity_criteria = ActivityCriteria.query.filter_by(
+            user_activity_id=user_activity.id
+        ).all()
 
-        for detail in activity_details_raw:
-            dnsh = detail['dnsh']['value'].split('#')[-1]
-            dnsh_description = detail['dnshDescription']['value']
+        criteria = {}
+        for criterion in activity_criteria:
+            dnsh = criterion.dnsh
+            dnsh_description = criterion.criteria_description
+            is_compliant = criterion.is_compliant
 
             # Categorize the criteria based on your criteria categories
             category = categorize_dnsh(dnsh)
             if category not in criteria:
                 criteria[category] = []
-            criteria[category].append({'dnsh': dnsh, 'description': dnsh_description})
+
+            criteria[category].append({
+                'dnsh': dnsh,
+                'description': dnsh_description,
+                'is_compliant': is_compliant
+            })
 
         activities_with_details.append({
             'id': user_activity.activity_id,
-            'activityName': activity_details_raw[0]['activity']['value'].split('#')[-1].replace('_', ' ').title(),
+            'activityName': user_activity.activity_id,  # Adjust as per your requirement
             'criteria': criteria
         })
 
     return render_template('my_activities.html', user_activities=activities_with_details)
-
-
 
 @app.route('/upload_file', methods=['POST'])
 def upload_file():
