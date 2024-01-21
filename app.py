@@ -53,6 +53,12 @@ class ActivityCriteria(db.Model):
     dnsh = db.Column(db.String(250), nullable=False)  # Add this line
     criteria_description = db.Column(db.Text)
     is_compliant = db.Column(db.Boolean, default=False)
+
+class ActivityWrapper:
+    def __init__(self, user_activity, activity_name):
+        self.user_activity = user_activity
+        self.activity_name = activity_name
+   
 # Initialize app with extension
 db.init_app(app)
 # Create database within app context
@@ -230,21 +236,22 @@ def publish_list():
 
 @app.route('/forum')
 def forum():
+    published_users_data = []
+
     published_users = Users.query.filter_by(is_published=True).all()
-
-    print("Published Users:", published_users)  # Debug output
-
     for user in published_users:
-        print("User:", user.username)  # Debug output
+        user_data = {
+            "username": user.username,
+            "activities": [],
+            "id": user.id
+        }
         for activity in user.activities:
-            print("Activity ID:", activity.activity_id)  # Debug output
-
-            activity.criteria_details = ActivityCriteria.query.filter_by(
-                user_activity_id=activity.id
-            ).all()
-            print("Criteria:", activity.criteria_details)  # Debug output
-
-    return render_template('forum.html', published_users=published_users)
+            activity_details = get_activity_details(activity.activity_id)
+            activity_name = activity_details[0]["activity"]["value"].split('#')[-1]
+            wrapped_activity = ActivityWrapper(activity, activity_name)
+            user_data["activities"].append(wrapped_activity)
+        published_users_data.append(user_data)
+    return render_template('forum.html', published_users=published_users_data)
 
 
 @app.route("/logout")
@@ -651,23 +658,32 @@ def download_activity_data(activity_id):
     return send_from_directory('downloads', f"{activity_id}.ttl", as_attachment=True)
 
 
+from flask import current_app
+
 @app.route('/download_user_activities/<user_id>')
 def download_user_activities(user_id):
-    user_activities = UserActivities.query.filter_by(user_id=user_id).all()
-    activity_ids = [activity.activity_id for activity in user_activities]
+    try:
+        user_activities = UserActivities.query.filter_by(user_id=user_id).all()
+        activity_ids = [activity.activity_id for activity in user_activities]
 
-    results = []
-    for activity_id in activity_ids:
-        activity_results = execute_sparql_query(activity_id)
-        results.extend(activity_results["results"]["bindings"])
+        results = []
+        for activity_id in activity_ids:
+            activity_results = execute_sparql_query(activity_id)
+            if activity_results and "results" in activity_results and "bindings" in activity_results["results"]:
+                results.extend(activity_results["results"]["bindings"])
+            else:
+                current_app.logger.error(f"No data for activity ID {activity_id}")
 
-    ttl_data = convert_to_ttl({'results': {'bindings': results}})
+        ttl_data = convert_to_ttl({'results': {'bindings': results}})
 
-    file_path = os.path.join('downloads', f"user_{user_id}_activities.ttl")
-    with open(file_path, 'w') as file:
-        file.write(ttl_data)
+        file_path = os.path.join('downloads', f"user_{user_id}_activities.ttl")
+        with open(file_path, 'w') as file:
+            file.write(ttl_data)
 
-    return send_from_directory('downloads', f"user_{user_id}_activities.ttl", as_attachment=True)
+        return send_from_directory('downloads', f"user_{user_id}_activities.ttl", as_attachment=True)
+    except Exception as e:
+        current_app.logger.error(f"Error in download_user_activities: {e}")
+        return "An error occurred while processing your request.", 500
 
 def execute_sparql_query(activity_ids):
     formatted_ids = ', '.join(f':{id}' for id in activity_ids)

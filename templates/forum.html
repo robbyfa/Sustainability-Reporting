@@ -21,13 +21,13 @@
           </button>
         </div>
         <div class="bg-white shadow-md rounded-lg">
-          {% for activity in user.activities %}
+          {% for wrapped_activity in user.activities %}
           <div class="p-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-700">
-              {{ activity.activityName }}
+            <h3 class="text-md font-semibold text-gray-700">
+              {{ wrapped_activity.activity_name | replace('_', ' ') | title }}
             </h3>
             <ul class="list-disc pl-5 mt-2">
-              {% for criterion in activity.criteria %}
+              {% for criterion in wrapped_activity.user_activity.criteria %}
               <li class="text-gray-600">
                 {{ criterion.criteria_description }} -
                 <span
