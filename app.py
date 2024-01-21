@@ -14,7 +14,7 @@ import os
 app = Flask(__name__)
 
 # Initialize SPARQL endpoint connection
-sparql_endpoint_url = "http://Roberts-MacBook-Pro.local:7200/repositories/Ontology"
+sparql_endpoint_url = "http://Amirs-MacBook-Pro.local:7200/repositories/Tempppp"
 sparql = SPARQLWrapper(sparql_endpoint_url)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///dsp.sqlite"
@@ -617,4 +617,4 @@ def perform_sparql_query(query):
         abort(500, description=f"SPARQL query failed: {e}")
 
 if __name__ == '__main__':
-    app.run(debug=Truexs)
+    app.run(debug=True)
