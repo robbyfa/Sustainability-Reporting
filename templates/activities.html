@@ -50,6 +50,8 @@
                   {{ activity.activityName | replace('_', ' ') | title}}
                 </a>
               </td>
+              {% if is_user_logged_in %}
+
               <td class="px-4 py-4 border-b border-gray-300 bg-white text-lg">
                 <button
                   onclick="addActivity('{{ activity.id }}')"
@@ -58,6 +60,7 @@
                   +
                 </button>
               </td>
+              {% endif %}
             </tr>
             {% endfor %}
           </tbody>

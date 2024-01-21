@@ -428,7 +428,10 @@ WHERE {
         'id': result['id']['value'].split('#')[-1],  # Extracting the ID after the hash
         'activityName': result['activity']['value'].split('#')[-1]  # Extracting the activity name after the hash
     } for result in results["results"]["bindings"]]
-    return render_template('activities.html', activities=activities)
+
+    is_user_logged_in = current_user.is_authenticated
+
+    return render_template('activities.html', activities=activities, is_user_logged_in=is_user_logged_in)
 
 def get_activity_details(activity_id):
     query = f"""
