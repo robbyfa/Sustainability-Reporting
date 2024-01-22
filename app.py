@@ -311,9 +311,11 @@ def predict_nace():
     predicted_codes = predict_nace_code(activity_desc, logistic_model, bert_model, tokenizer, top_n=5)
     nace_code_details = []
     for code, _ in predicted_codes:
-        query_result = fetch_nace_code_label(code)
+        print("CODE: ", code)
+        query_result = fetch_nace_description(code)
+        print("QUERY RESULT: ", query_result)
         if query_result:
-            nace_code_details.append((code, query_result['label']))
+            nace_code_details.append((code, query_result))
     
     keywords = [
  'space',
@@ -362,34 +364,20 @@ def refine_search():
 
 def fetch_nace_code_label(nace_code_id):
     query = f"""
-
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-PREFIX : <http://webprotege.stanford.edu/>
-
-SELECT DISTINCT ?activity ?sectorLabel ?label ?description ?naceCode ?naceCodeLabel WHERE {{
-  ?activity rdfs:subClassOf ?restriction.
-  ?restriction owl:onProperty :hasNACEcode;
-               owl:someValuesFrom ?naceCode.
-  ?naceCode rdfs:label ?naceCodeLabel.
-  FILTER(regex(?naceCodeLabel, "{nace_code_id}"))
-
-  ?activity rdfs:label ?label.
-  ?activity rdfs:comment ?description.
-	
-
-  # Find the immediate subclass of Sector
-  ?activity rdfs:subClassOf ?sector.
-  ?sector rdfs:subClassOf :RvEgWeSfFfxLGndqT1Qdnl.
-  ?sector rdfs:label ?sectorLabel.
-  
-  # Ensure ?sector is not a subclass of another subclass of Sector
-  FILTER NOT EXISTS {{
-    ?sector rdfs:subClassOf+ ?subSector.
-    ?subSector rdfs:subClassOf :RvEgWeSfFfxLGndqT1Qdnl.
-    FILTER(?subSector != ?sector)
-  }}
-}}
+ PREFIX O: <http://webprotege.stanford.edu/>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+    PREFIX : <urn:webprotege:ontology:d878d309-7488-4f8e-bb22-6fb2a4ade91b#>
+    SELECT ?id ?activity ?nace
+    WHERE {{
+        ?activity a O:Activity .
+        ?activity O:RBzAtbayB7mUyTnWUhdnsnn ?id .
+        OPTIONAL {{ ?activity O:hasNACEcode ?nace . }}
+        FILTER(?nace = :{nace_code_id}) # Select based on code
+    }}
+    ORDER BY ASC(?id)
 """
     
 
