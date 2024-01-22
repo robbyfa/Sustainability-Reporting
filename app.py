@@ -184,6 +184,10 @@ def my_activities():
             user_activity_id=user_activity.id
         ).all()
 
+        # Fetch activity details using the activity_id
+        activity_details = get_activity_details(user_activity.activity_id)
+        activity_name = activity_details[0]["activity"]["value"].split('#')[-1].replace('_', ' ').title() if activity_details else "Unknown Activity"
+
         criteria = {}
         for criterion in activity_criteria:
             dnsh = criterion.dnsh
@@ -203,7 +207,7 @@ def my_activities():
 
         activities_with_details.append({
             'id': user_activity.activity_id,
-            'activityName': user_activity.activity_id,  # Adjust as per your requirement
+            'activityName': activity_name,  # Now using the activity name
             'criteria': criteria
         })
 
