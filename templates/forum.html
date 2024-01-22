@@ -6,9 +6,26 @@
       <h1 class="text-4xl font-bold text-center text-gray-900 mb-10">
         Published Lists
       </h1>
+      <!-- Search Bar -->
+      <div class="flex justify-end my-4">
+        <div class="flex items-center space-x-2">
+          <label for="searchInput" class="font-semibold text-gray-700"
+            >Search for user:</label
+          >
+          <input
+            type="text"
+            id="searchInput"
+            onkeyup="searchUsers()"
+            placeholder="Enter username..."
+            class="form-input mt-1 block w-full md:w-64 border-2 border-gray-300 bg-white h-10 px-5 rounded-lg text-sm focus:border-blue-500"
+          />
+        </div>
+      </div>
+
+      <!-- Existing HTML for listing users -->
 
       {% for user in published_users %}
-      <div class="mb-8">
+      <div class="mb-8 user-section">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-2xl font-bold text-gray-800">
             {{ user.username }}'s Activities
@@ -47,4 +64,22 @@
       {% endfor %}
     </div>
   </body>
+
+  <script>
+    function searchUsers() {
+      var input, filter, i, txtValue;
+      input = document.getElementById("searchInput");
+      filter = input.value.toUpperCase();
+      users = document.getElementsByClassName("user-section");
+
+      for (i = 0; i < users.length; i++) {
+        txtValue = users[i].textContent || users[i].innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+          users[i].style.display = "";
+        } else {
+          users[i].style.display = "none";
+        }
+      }
+    }
+  </script>
 </html>
