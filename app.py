@@ -52,7 +52,8 @@ class ActivityCriteria(db.Model):
     user_activity_id = db.Column(db.Integer, db.ForeignKey('user_activities.id'), nullable=False)
     dnsh = db.Column(db.String(250), nullable=False)  # Add this line
     criteria_description = db.Column(db.Text)
-    is_compliant = db.Column(db.Boolean, default=False)
+    compliance_status = db.Column(db.String(50), default="Not Compliant")  # Replacing is_compliant
+
 
 class ActivityWrapper:
     def __init__(self, user_activity, activity_name):
@@ -108,7 +109,7 @@ def add_activity(activity_id):
             user_activity_id=new_activity.id,
             dnsh=detail['dnsh']['value'].split('#')[-1],
             criteria_description=description_text,
-            is_compliant=False  # default value
+            compliance_status = "Not Compliant"
         )
         db.session.add(new_criterion)
 
@@ -142,20 +143,19 @@ def update_compliance(activity_id, dnsh):
     if not user_activity:
         return jsonify({'message': 'Activity not found.', 'category': 'error'}), 404
 
-    # Fetch the corresponding criterion based on dnsh description
     criteria = ActivityCriteria.query.filter_by(
         user_activity_id=user_activity.id,
-        dnsh=dnsh  # Assuming dnsh holds the description or a part of it
+        dnsh=dnsh
     ).first()
 
     if not criteria:
         return jsonify({'message': 'Criteria not found.', 'category': 'error'}), 404
 
-    is_compliant = request.json.get('is_compliant', False)
-    criteria.is_compliant = is_compliant
+    compliance_status = request.json.get('compliance_status', "Not Compliant")
+    criteria.compliance_status = compliance_status
     db.session.commit()
 
-    return jsonify({'message': 'Compliance updated successfully!', 'category': 'success'}), 200
+    return jsonify({'message': 'Compliance status updated successfully!', 'category': 'success'}), 200
 
 def categorize_dnsh(dnsh):
     # Example categorization based on keywords in DNSH identifiers
@@ -176,8 +176,9 @@ def categorize_dnsh(dnsh):
 def my_activities():
     current_user_id = current_user.get_id()
     user_activities = UserActivities.query.filter_by(user_id=current_user_id).all()
-
     activities_with_details = []
+    user = Users.query.get(current_user_id)  # Retrieve the current user
+    is_published = user.is_published
 
     for user_activity in user_activities:
         activity_criteria = ActivityCriteria.query.filter_by(
@@ -192,7 +193,7 @@ def my_activities():
         for criterion in activity_criteria:
             dnsh = criterion.dnsh
             dnsh_description = criterion.criteria_description
-            is_compliant = criterion.is_compliant
+            compliance_status = criterion.compliance_status
 
             # Categorize the criteria based on your criteria categories
             category = categorize_dnsh(dnsh)
@@ -202,7 +203,7 @@ def my_activities():
             criteria[category].append({
                 'dnsh': dnsh,
                 'description': dnsh_description,
-                'is_compliant': is_compliant
+                'compliance_status': compliance_status
             })
 
         activities_with_details.append({
@@ -211,7 +212,7 @@ def my_activities():
             'criteria': criteria
         })
 
-    return render_template('my_activities.html', user_activities=activities_with_details)
+    return render_template('my_activities.html', user_activities=activities_with_details, is_published=is_published)
 
 @app.route('/upload_file', methods=['POST'])
 def upload_file():
@@ -237,6 +238,14 @@ def publish_list():
     current_user.is_published = True
     db.session.commit()
     return jsonify({'message': 'List published successfully!'}), 200
+
+@app.route('/unpublish_list', methods=['POST'])
+@login_required
+def unpublish_list():
+    current_user.is_published = False
+    db.session.commit()
+    return jsonify({'message': 'List removed successfully!'}), 200
+
 
 @app.route('/forum')
 def forum():

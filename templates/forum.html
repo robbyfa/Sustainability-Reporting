@@ -48,10 +48,10 @@
               <li class="text-gray-600">
                 {{ criterion.criteria_description }} -
                 <span
-                  class="{{ 'text-green-500' if criterion.is_compliant else 'text-red-500' }}"
-                  >{{ 'Compliant' if criterion.is_compliant else 'Non-Compliant'
-                  }}</span
+                  class="{{ 'text-red-500' if criterion.compliance_status == 'Not Compliant' else ('text-yellow-500' if criterion.compliance_status == 'In Progress' else 'text-green-500') }}"
                 >
+                  {{ criterion.compliance_status }}
+                </span>
               </li>
               {% endfor %}
             </ul>

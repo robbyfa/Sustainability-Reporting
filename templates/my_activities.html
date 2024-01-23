@@ -7,7 +7,7 @@
       <h1 class="text-4xl font-bold text-center text-black mb-10">
         Subscribed Activities
       </h1>
-
+    
       <div class="overflow-x-auto bg-white shadow-md rounded-lg">
         <table class="min-w-full leading-normal">
           <tbody id="activity-table-body">
@@ -41,17 +41,23 @@
                     <tbody>
                       {% for criterion in criteria_list %}
                       <tr>
-                        <td class="border px-4 py-2 text-black">
-                          <div class="flex items-center">
-                            <input type="checkbox" data-activity-id="{{
-                            activity.id }}" data-dnsh="{{ criterion.dnsh }}"
-                            onchange="updateCompliance(this.getAttribute('data-activity-id'),
-                            this.getAttribute('data-dnsh'), this.checked)" {{
-                            'checked' if criterion.is_compliant else '' }} /> {{
-                            criterion.description }}
+                        <td class="border px-4 py-2 w-3/4">
+                          <div class="text-black">
+                            {{ criterion.description }}
                           </div>
                         </td>
+                        <td class="border px-4 py-2 w-1/4">
+                          <select onchange="updateCompliance('{{ activity.id }}', '{{ criterion.dnsh }}', this.value)"
+                          class="form-select block mx-auto px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                      <option value="Not Compliant" {{ 'selected' if criterion.compliance_status == 'Not Compliant' else '' }}>Not Compliant</option>
+                      <option value="In Progress" {{ 'selected' if criterion.compliance_status == 'In Progress' else '' }}>In Progress</option>
+                      <option value="Compliant" {{ 'selected' if criterion.compliance_status == 'Compliant' else '' }}>Compliant</option>
+                  </select>
+                  
+                        </td>
                       </tr>
+                      
+                      
                       {% endfor %}
                     </tbody>
                   </table>
@@ -62,12 +68,24 @@
             {% endfor %}
           </tbody>
         </table>
+        {% if is_published %}
+        <!-- Show the "Remove from forum" button -->
         <button
-          onclick="publishList()"
-          class="bg-black mx-2 text-white hover:bg-white hover:text-black py-2 px-4 rounded transition duration-300 mb-2"
+            onclick="unpublishList()"
+            class="bg-black mx-2 text-white hover:bg-white hover:text-black py-2 px-4 rounded transition duration-300 mb-2"
         >
-          Publish
+            Remove from forum
         </button>
+    {% else %}
+        <!-- Show the "Publish" button -->
+        <button
+            onclick="publishList()"
+            class="bg-black mx-2 text-white hover:bg-white hover:text-black py-2 px-4 rounded transition duration-300 mb-2"
+        >
+            Publish
+        </button>
+    {% endif %}
+    
       </div>
     </div>
     <script>
@@ -101,31 +119,31 @@
           });
       }
 
-      function updateCompliance(activityId, dnsh, isCompliant) {
-        if (!activityId || !dnsh) {
-          console.error("Invalid activity ID or DNSH.");
-          return;
-        }
+      function updateCompliance(activityId, dnsh, complianceStatus) {
+  if (!activityId || !dnsh) {
+    console.error("Invalid activity ID or DNSH.");
+    return;
+  }
 
-        fetch(`/update_compliance/${activityId}/${dnsh}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ is_compliant: isCompliant }),
-        })
-          .then((response) => {
-            if (response.ok) {
-              alert("Compliance status updated.");
-            } else {
-              alert("Failed to update compliance status.");
-            }
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-            alert("An error occurred.");
-          });
-      }
+  fetch(`/update_compliance/${activityId}/${dnsh}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ compliance_status: complianceStatus }),
+  })
+  .then((response) => {
+    if (response.ok) {
+      alert("Compliance status updated.");
+    } else {
+      alert("Failed to update compliance status.");
+    }
+  })
+  .catch((error) => {
+    console.error("Error:", error);
+    alert("An error occurred.");
+  });
+}
 
       function publishList() {
         fetch("/publish_list", {
@@ -144,27 +162,23 @@
           });
       }
 
-      function uploadFile(activityId) {
-        var formData = new FormData();
-        var fileField = document.querySelector(`#file_${activityId}`);
-
-        formData.append("file", fileField.files[0]);
-        formData.append("activityId", activityId);
-
-        fetch("/upload_file", {
+      function unpublishList() {
+        fetch("/unpublish_list", {
           method: "POST",
-          body: formData,
         })
-          .then((response) => response.json())
-          .then((result) => {
-            console.log("Success:", result);
-            alert("File uploaded successfully.");
+          .then((response) => {
+            if (response.ok) {
+              alert("List removed successfully.");
+            } else {
+              alert("Failed to removed list.");
+            }
           })
           .catch((error) => {
             console.error("Error:", error);
-            alert("An error occurred during file upload.");
+            alert("An error occurred.");
           });
       }
+
     </script>
 
     <script
