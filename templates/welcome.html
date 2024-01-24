@@ -3,10 +3,12 @@
   {% include 'navbar.html' %}
 
   <body class="bg-gray-100">
-    <div class="flex items-center justify-center h-screen">
-      <div class="text-center">
-        <h1 class="text-6xl font-bold mb-6">Sustainability Reporting</h1>
-        <p class="mb-4 texy-justify">
+    <div class="h-screen flex flex-col items-center justify-center">
+      <div class="container mx-auto p-8">
+        <h1 class="text-6xl font-bold mb-6 text-center">
+          Sustainability Reporting
+        </h1>
+        <p class="mb-4 text-justify">
           Welcome to our sustainable reporting platform, crafted in accordance
           with the EU taxonomy. Navigate through the four pages: the
           introduction home page, the interactive criteria finder, the
@@ -15,12 +17,63 @@
           information, integrating an ontology for structured data analysis. For
           inquiries, contact us at (email address).
         </p>
-        <a
-          href="/describe-activity"
-          class="bg-white mx-2 text-black hover:bg-black hover:text-white py-2 px-4 rounded transition duration-300"
-          >Get Started</a
-        >
+        <div class="text-center">
+          <a
+            href="#describe-activity"
+            class="bg-white mx-auto text-black hover:bg-black hover:text-white py-2 px-4 rounded transition duration-300 self-center"
+            >Get Started</a
+          >
+        </div>
       </div>
     </div>
+
+    <div
+      id="describe-activity"
+      class="h-screen flex items-center justify-center"
+    >
+      <div class="container mx-auto p-8">
+        <h2 class="text-4xl font-bold mb-4 text-center">
+          Describe Your Activity
+        </h2>
+        <p class="mb-4 text-justify">
+          Explore sustainable reporting criteria tailored to your activity.
+          Upload your document or input keywords to discover your activity
+          number and NACE code. Access all criteria related to your activity,
+          tick the boxes for compliance, and track progress through interactive
+          progress bars. Share and link your progress bars to your personal
+          account for a comprehensive overview of your sustainable reporting
+          efforts.
+        </p>
+        <form action="/predict-nace" method="POST" class="max-w-xl mx-auto">
+          <textarea
+            name="activityDesc"
+            rows="4"
+            class="w-full p-2 border rounded"
+          ></textarea>
+          <div class="text-center">
+            <button
+              type="submit"
+              class="bg-white mx-auto text-black hover:bg-black hover:text-white py-2 px-4 rounded transition duration-300 self-center"
+            >
+              Submit
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- JavaScript to handle scrolling when the button is clicked -->
+    <script>
+      document
+        .querySelector('a[href="#describe-activity"]')
+        .addEventListener("click", function (e) {
+          e.preventDefault(); // Prevent the default anchor link behavior
+          const target = document.getElementById("describe-activity"); // Get the target div
+          window.scrollTo({
+            top: target.offsetTop, // Scroll to the top of the target div
+            behavior: "smooth", // Smooth scrolling effect
+          });
+        });
+    </script>
   </body>
 </html>

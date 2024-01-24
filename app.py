@@ -404,10 +404,6 @@ def fetch_nace_code_label(nace_code_id):
 def home():
     return render_template('welcome.html')
 
-@app.route('/describe-activity', methods=['GET'])
-def desc_activity():
-    return render_template('describe_activity.html')
-
 @app.route('/activities/construction', methods=['GET'])
 def get_construction_activities():
     query_string = """
