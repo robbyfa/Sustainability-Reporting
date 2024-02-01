@@ -403,7 +403,7 @@ def fetch_nace_code_label(nace_code_id):
 @app.route('/', methods=['GET'])
 def home():
     return render_template('welcome.html')
-
+ 
 @app.route('/activities/construction', methods=['GET'])
 def get_construction_activities():
     query_string = """
