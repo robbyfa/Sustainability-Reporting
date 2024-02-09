@@ -14,7 +14,7 @@ import os
 app = Flask(__name__)
 
 # Initialize SPARQL endpoint connection
-sparql_endpoint_url = "http://Amirs-MacBook-Pro.local:7200/repositories/Tempppp"
+sparql_endpoint_url = "http://Roberts-MacBook-Pro.local:7200/repositories/Ontology"
 sparql = SPARQLWrapper(sparql_endpoint_url)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///dsp.sqlite"
@@ -622,6 +622,96 @@ def perform_sparql_query(query):
         return sparql.query().convert()
     except Exception as e:
         abort(500, description=f"SPARQL query failed: {e}")
+
+
+
+def convert_to_ttl(results):
+    ttl_content = ""
+
+    for result in results["results"]["bindings"]:
+        activity_uri = result["activity"]["value"]
+        activity_desc = result.get("activityDescription", {}).get("value", "")
+        dnsh_uri = result.get("dnsh", {}).get("value", "")
+        dnsh_desc = result.get("dnshDescription", {}).get("value", "")
+
+        ttl_content += f"<{activity_uri}> rdf:type O:Activity .\n"
+        if activity_desc:
+            ttl_content += f"<{activity_uri}> O:description \"{activity_desc}\" .\n"
+        if dnsh_uri:
+            ttl_content += f"<{activity_uri}> O:RBap0csvNkeimTd1pZxLYDp <{dnsh_uri}> .\n"
+            ttl_content += f"<{dnsh_uri}> O:description \"{dnsh_desc}\" .\n"
+
+    return ttl_content
+
+@app.route('/download_activity_data/<activity_id>')
+def download_activity_data(activity_id):
+    results = execute_sparql_query(activity_id)
+    
+    # Convert results to TTL format
+    ttl_data = convert_to_ttl(results)
+
+    # Define file path and save the file
+    file_path = os.path.join('downloads', f"{activity_id}.ttl")
+    with open(file_path, 'w') as file:
+        file.write(ttl_data)
+
+    return send_from_directory('downloads', f"{activity_id}.ttl", as_attachment=True)
+
+
+from flask import current_app
+
+@app.route('/download_user_activities/<user_id>')
+def download_user_activities(user_id):
+    try:
+        user_activities = UserActivities.query.filter_by(user_id=user_id).all()
+        activity_ids = [activity.activity_id for activity in user_activities]
+
+        results = []
+        for activity_id in activity_ids:
+            activity_results = execute_sparql_query(activity_id)
+            if activity_results and "results" in activity_results and "bindings" in activity_results["results"]:
+                results.extend(activity_results["results"]["bindings"])
+            else:
+                current_app.logger.error(f"No data for activity ID {activity_id}")
+
+        ttl_data = convert_to_ttl({'results': {'bindings': results}})
+
+        file_path = os.path.join('downloads', f"user_{user_id}_activities.ttl")
+        with open(file_path, 'w') as file:
+            file.write(ttl_data)
+
+        return send_from_directory('downloads', f"user_{user_id}_activities.ttl", as_attachment=True)
+    except Exception as e:
+        current_app.logger.error(f"Error in download_user_activities: {e}")
+        return "An error occurred while processing your request.", 500
+
+def execute_sparql_query(activity_ids):
+    formatted_ids = ', '.join(f':{id}' for id in activity_ids)
+
+    query = f"""
+     PREFIX O: <http://webprotege.stanford.edu/>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+    PREFIX : <urn:webprotege:ontology:d878d309-7488-4f8e-bb22-6fb2a4ade91b#>
+    SELECT ?id ?activity ?activityDescription ?dnsh ?dnshDescription
+    WHERE {{
+        ?activity a O:Activity .
+        ?activity O:RBzAtbayB7mUyTnWUhdnsnn ?id .
+        OPTIONAL {{ ?activity O:description ?activityDescription . }}
+        OPTIONAL {{ ?activity O:RBap0csvNkeimTd1pZxLYDp ?dnsh . OPTIONAL {{ ?dnsh O:description ?dnshDescription . }} }}
+        FILTER(?id IN (:{activity_ids})) # Filter for multiple IDs
+    }}
+    ORDER BY ASC(?id)
+    """
+    print("FORMATTED IDs: ", formatted_ids)
+    sparql.setQuery(query)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+    return results
+
+# Rest of the functions remain the same
 
 if __name__ == '__main__':
     app.run(debug=True)
