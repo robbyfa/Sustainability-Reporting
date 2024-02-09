@@ -52,7 +52,14 @@ class ActivityCriteria(db.Model):
     user_activity_id = db.Column(db.Integer, db.ForeignKey('user_activities.id'), nullable=False)
     dnsh = db.Column(db.String(250), nullable=False)  # Add this line
     criteria_description = db.Column(db.Text)
-    is_compliant = db.Column(db.Boolean, default=False)
+    compliance_status = db.Column(db.String(50), default="Not Compliant")  # Replacing is_compliant
+
+
+class ActivityWrapper:
+    def __init__(self, user_activity, activity_name):
+        self.user_activity = user_activity
+        self.activity_name = activity_name
+   
 # Initialize app with extension
 db.init_app(app)
 # Create database within app context
@@ -102,7 +109,7 @@ def add_activity(activity_id):
             user_activity_id=new_activity.id,
             dnsh=detail['dnsh']['value'].split('#')[-1],
             criteria_description=description_text,
-            is_compliant=False  # default value
+            compliance_status = "Not Compliant"
         )
         db.session.add(new_criterion)
 
@@ -136,20 +143,19 @@ def update_compliance(activity_id, dnsh):
     if not user_activity:
         return jsonify({'message': 'Activity not found.', 'category': 'error'}), 404
 
-    # Fetch the corresponding criterion based on dnsh description
     criteria = ActivityCriteria.query.filter_by(
         user_activity_id=user_activity.id,
-        dnsh=dnsh  # Assuming dnsh holds the description or a part of it
+        dnsh=dnsh
     ).first()
 
     if not criteria:
         return jsonify({'message': 'Criteria not found.', 'category': 'error'}), 404
 
-    is_compliant = request.json.get('is_compliant', False)
-    criteria.is_compliant = is_compliant
+    compliance_status = request.json.get('compliance_status', "Not Compliant")
+    criteria.compliance_status = compliance_status
     db.session.commit()
 
-    return jsonify({'message': 'Compliance updated successfully!', 'category': 'success'}), 200
+    return jsonify({'message': 'Compliance status updated successfully!', 'category': 'success'}), 200
 
 def categorize_dnsh(dnsh):
     # Example categorization based on keywords in DNSH identifiers
@@ -170,19 +176,24 @@ def categorize_dnsh(dnsh):
 def my_activities():
     current_user_id = current_user.get_id()
     user_activities = UserActivities.query.filter_by(user_id=current_user_id).all()
-
     activities_with_details = []
+    user = Users.query.get(current_user_id)  # Retrieve the current user
+    is_published = user.is_published
 
     for user_activity in user_activities:
         activity_criteria = ActivityCriteria.query.filter_by(
             user_activity_id=user_activity.id
         ).all()
 
+        # Fetch activity details using the activity_id
+        activity_details = get_activity_details(user_activity.activity_id)
+        activity_name = activity_details[0]["activity"]["value"].split('#')[-1].replace('_', ' ').title() if activity_details else "Unknown Activity"
+
         criteria = {}
         for criterion in activity_criteria:
             dnsh = criterion.dnsh
             dnsh_description = criterion.criteria_description
-            is_compliant = criterion.is_compliant
+            compliance_status = criterion.compliance_status
 
             # Categorize the criteria based on your criteria categories
             category = categorize_dnsh(dnsh)
@@ -192,16 +203,16 @@ def my_activities():
             criteria[category].append({
                 'dnsh': dnsh,
                 'description': dnsh_description,
-                'is_compliant': is_compliant
+                'compliance_status': compliance_status
             })
 
         activities_with_details.append({
             'id': user_activity.activity_id,
-            'activityName': user_activity.activity_id,  # Adjust as per your requirement
+            'activityName': activity_name,  # Now using the activity name
             'criteria': criteria
         })
 
-    return render_template('my_activities.html', user_activities=activities_with_details)
+    return render_template('my_activities.html', user_activities=activities_with_details, is_published=is_published)
 
 @app.route('/upload_file', methods=['POST'])
 def upload_file():
@@ -228,23 +239,32 @@ def publish_list():
     db.session.commit()
     return jsonify({'message': 'List published successfully!'}), 200
 
+@app.route('/unpublish_list', methods=['POST'])
+@login_required
+def unpublish_list():
+    current_user.is_published = False
+    db.session.commit()
+    return jsonify({'message': 'List removed successfully!'}), 200
+
+
 @app.route('/forum')
 def forum():
+    published_users_data = []
+
     published_users = Users.query.filter_by(is_published=True).all()
-
-    print("Published Users:", published_users)  # Debug output
-
     for user in published_users:
-        print("User:", user.username)  # Debug output
+        user_data = {
+            "username": user.username,
+            "activities": [],
+            "id": user.id
+        }
         for activity in user.activities:
-            print("Activity ID:", activity.activity_id)  # Debug output
-
-            activity.criteria_details = ActivityCriteria.query.filter_by(
-                user_activity_id=activity.id
-            ).all()
-            print("Criteria:", activity.criteria_details)  # Debug output
-
-    return render_template('forum.html', published_users=published_users)
+            activity_details = get_activity_details(activity.activity_id)
+            activity_name = activity_details[0]["activity"]["value"].split('#')[-1]
+            wrapped_activity = ActivityWrapper(activity, activity_name)
+            user_data["activities"].append(wrapped_activity)
+        published_users_data.append(user_data)
+    return render_template('forum.html', published_users=published_users_data)
 
 
 @app.route("/logout")
@@ -300,9 +320,11 @@ def predict_nace():
     predicted_codes = predict_nace_code(activity_desc, logistic_model, bert_model, tokenizer, top_n=5)
     nace_code_details = []
     for code, _ in predicted_codes:
-        query_result = fetch_nace_code_label(code)
+        print("CODE: ", code)
+        query_result = fetch_nace_description(code)
+        print("QUERY RESULT: ", query_result)
         if query_result:
-            nace_code_details.append((code, query_result['label']))
+            nace_code_details.append((code, query_result))
     
     keywords = [
  'space',
@@ -351,34 +373,20 @@ def refine_search():
 
 def fetch_nace_code_label(nace_code_id):
     query = f"""
-
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-PREFIX : <http://webprotege.stanford.edu/>
-
-SELECT DISTINCT ?activity ?sectorLabel ?label ?description ?naceCode ?naceCodeLabel WHERE {{
-  ?activity rdfs:subClassOf ?restriction.
-  ?restriction owl:onProperty :hasNACEcode;
-               owl:someValuesFrom ?naceCode.
-  ?naceCode rdfs:label ?naceCodeLabel.
-  FILTER(regex(?naceCodeLabel, "{nace_code_id}"))
-
-  ?activity rdfs:label ?label.
-  ?activity rdfs:comment ?description.
-	
-
-  # Find the immediate subclass of Sector
-  ?activity rdfs:subClassOf ?sector.
-  ?sector rdfs:subClassOf :RvEgWeSfFfxLGndqT1Qdnl.
-  ?sector rdfs:label ?sectorLabel.
-  
-  # Ensure ?sector is not a subclass of another subclass of Sector
-  FILTER NOT EXISTS {{
-    ?sector rdfs:subClassOf+ ?subSector.
-    ?subSector rdfs:subClassOf :RvEgWeSfFfxLGndqT1Qdnl.
-    FILTER(?subSector != ?sector)
-  }}
-}}
+ PREFIX O: <http://webprotege.stanford.edu/>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+    PREFIX : <urn:webprotege:ontology:d878d309-7488-4f8e-bb22-6fb2a4ade91b#>
+    SELECT ?id ?activity ?nace
+    WHERE {{
+        ?activity a O:Activity .
+        ?activity O:RBzAtbayB7mUyTnWUhdnsnn ?id .
+        OPTIONAL {{ ?activity O:hasNACEcode ?nace . }}
+        FILTER(?nace = :{nace_code_id}) # Select based on code
+    }}
+    ORDER BY ASC(?id)
 """
     
 
@@ -395,11 +403,7 @@ SELECT DISTINCT ?activity ?sectorLabel ?label ?description ?naceCode ?naceCodeLa
 @app.route('/', methods=['GET'])
 def home():
     return render_template('welcome.html')
-
-@app.route('/describe-activity', methods=['GET'])
-def desc_activity():
-    return render_template('describe_activity.html')
-
+ 
 @app.route('/activities/construction', methods=['GET'])
 def get_construction_activities():
     query_string = """
@@ -421,7 +425,10 @@ WHERE {
         'id': result['id']['value'].split('#')[-1],  # Extracting the ID after the hash
         'activityName': result['activity']['value'].split('#')[-1]  # Extracting the activity name after the hash
     } for result in results["results"]["bindings"]]
-    return render_template('activities.html', activities=activities)
+
+    is_user_logged_in = current_user.is_authenticated
+
+    return render_template('activities.html', activities=activities, is_user_logged_in=is_user_logged_in)
 
 def get_activity_details(activity_id):
     query = f"""
@@ -615,87 +622,6 @@ def perform_sparql_query(query):
         return sparql.query().convert()
     except Exception as e:
         abort(500, description=f"SPARQL query failed: {e}")
-
-
-
-def convert_to_ttl(results):
-    ttl_content = ""
-
-    for result in results["results"]["bindings"]:
-        activity_uri = result["activity"]["value"]
-        activity_desc = result.get("activityDescription", {}).get("value", "")
-        dnsh_uri = result.get("dnsh", {}).get("value", "")
-        dnsh_desc = result.get("dnshDescription", {}).get("value", "")
-
-        ttl_content += f"<{activity_uri}> rdf:type O:Activity .\n"
-        if activity_desc:
-            ttl_content += f"<{activity_uri}> O:description \"{activity_desc}\" .\n"
-        if dnsh_uri:
-            ttl_content += f"<{activity_uri}> O:RBap0csvNkeimTd1pZxLYDp <{dnsh_uri}> .\n"
-            ttl_content += f"<{dnsh_uri}> O:description \"{dnsh_desc}\" .\n"
-
-    return ttl_content
-
-@app.route('/download_activity_data/<activity_id>')
-def download_activity_data(activity_id):
-    results = execute_sparql_query(activity_id)
-    
-    # Convert results to TTL format
-    ttl_data = convert_to_ttl(results)
-
-    # Define file path and save the file
-    file_path = os.path.join('downloads', f"{activity_id}.ttl")
-    with open(file_path, 'w') as file:
-        file.write(ttl_data)
-
-    return send_from_directory('downloads', f"{activity_id}.ttl", as_attachment=True)
-
-
-@app.route('/download_user_activities/<user_id>')
-def download_user_activities(user_id):
-    user_activities = UserActivities.query.filter_by(user_id=user_id).all()
-    activity_ids = [activity.activity_id for activity in user_activities]
-
-    results = []
-    for activity_id in activity_ids:
-        activity_results = execute_sparql_query(activity_id)
-        results.extend(activity_results["results"]["bindings"])
-
-    ttl_data = convert_to_ttl({'results': {'bindings': results}})
-
-    file_path = os.path.join('downloads', f"user_{user_id}_activities.ttl")
-    with open(file_path, 'w') as file:
-        file.write(ttl_data)
-
-    return send_from_directory('downloads', f"user_{user_id}_activities.ttl", as_attachment=True)
-
-def execute_sparql_query(activity_ids):
-    formatted_ids = ', '.join(f':{id}' for id in activity_ids)
-
-    query = f"""
-     PREFIX O: <http://webprotege.stanford.edu/>
-    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-    PREFIX owl: <http://www.w3.org/2002/07/owl#>
-    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-    PREFIX : <urn:webprotege:ontology:d878d309-7488-4f8e-bb22-6fb2a4ade91b#>
-    SELECT ?id ?activity ?activityDescription ?dnsh ?dnshDescription
-    WHERE {{
-        ?activity a O:Activity .
-        ?activity O:RBzAtbayB7mUyTnWUhdnsnn ?id .
-        OPTIONAL {{ ?activity O:description ?activityDescription . }}
-        OPTIONAL {{ ?activity O:RBap0csvNkeimTd1pZxLYDp ?dnsh . OPTIONAL {{ ?dnsh O:description ?dnshDescription . }} }}
-        FILTER(?id IN (:{activity_ids})) # Filter for multiple IDs
-    }}
-    ORDER BY ASC(?id)
-    """
-    print("FORMATTED IDs: ", formatted_ids)
-    sparql.setQuery(query)
-    sparql.setReturnFormat(JSON)
-    results = sparql.query().convert()
-    return results
-
-# Rest of the functions remain the same
 
 if __name__ == '__main__':
     app.run(debug=True)
